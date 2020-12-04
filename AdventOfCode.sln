@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.30523.141
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "01-ReportRepair", "01-ReportRepair\01-ReportRepair.vcxproj", "{B5197C00-DBDA-448B-A6D2-2523CF95632A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "02-PasswordPhilosophy", "02-PasswordPhilosophy\02-PasswordPhilosophy.vcxproj", "{E8DA2C94-358F-4190-AAD8-5298182F6939}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{B5197C00-DBDA-448B-A6D2-2523CF95632A}.Release|x64.Build.0 = Release|x64
 		{B5197C00-DBDA-448B-A6D2-2523CF95632A}.Release|x86.ActiveCfg = Release|Win32
 		{B5197C00-DBDA-448B-A6D2-2523CF95632A}.Release|x86.Build.0 = Release|Win32
+		{E8DA2C94-358F-4190-AAD8-5298182F6939}.Debug|x64.ActiveCfg = Debug|x64
+		{E8DA2C94-358F-4190-AAD8-5298182F6939}.Debug|x64.Build.0 = Debug|x64
+		{E8DA2C94-358F-4190-AAD8-5298182F6939}.Debug|x86.ActiveCfg = Debug|Win32
+		{E8DA2C94-358F-4190-AAD8-5298182F6939}.Debug|x86.Build.0 = Debug|Win32
+		{E8DA2C94-358F-4190-AAD8-5298182F6939}.Release|x64.ActiveCfg = Release|x64
+		{E8DA2C94-358F-4190-AAD8-5298182F6939}.Release|x64.Build.0 = Release|x64
+		{E8DA2C94-358F-4190-AAD8-5298182F6939}.Release|x86.ActiveCfg = Release|Win32
+		{E8DA2C94-358F-4190-AAD8-5298182F6939}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

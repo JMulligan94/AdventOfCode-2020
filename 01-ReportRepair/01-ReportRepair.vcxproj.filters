@@ -21,7 +21,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Input.txt">
-      <Filter>Source Files</Filter>
+      <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
 </Project>
