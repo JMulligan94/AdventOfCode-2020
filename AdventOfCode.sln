@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "04-PassportProcessing", "04
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "05-BinaryBoarding", "05-BinaryBoarding\05-BinaryBoarding.vcxproj", "{AB8E014D-DF36-4D80-976F-8F3A492CD939}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "06-CustomCustoms", "06-CustomCustoms\06-CustomCustoms.vcxproj", "{EC4406B5-FA8F-426B-B30E-DE499E03DF8B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -61,6 +63,14 @@ Global
 		{AB8E014D-DF36-4D80-976F-8F3A492CD939}.Release|x64.Build.0 = Release|x64
 		{AB8E014D-DF36-4D80-976F-8F3A492CD939}.Release|x86.ActiveCfg = Release|Win32
 		{AB8E014D-DF36-4D80-976F-8F3A492CD939}.Release|x86.Build.0 = Release|Win32
+		{EC4406B5-FA8F-426B-B30E-DE499E03DF8B}.Debug|x64.ActiveCfg = Debug|x64
+		{EC4406B5-FA8F-426B-B30E-DE499E03DF8B}.Debug|x64.Build.0 = Debug|x64
+		{EC4406B5-FA8F-426B-B30E-DE499E03DF8B}.Debug|x86.ActiveCfg = Debug|Win32
+		{EC4406B5-FA8F-426B-B30E-DE499E03DF8B}.Debug|x86.Build.0 = Debug|Win32
+		{EC4406B5-FA8F-426B-B30E-DE499E03DF8B}.Release|x64.ActiveCfg = Release|x64
+		{EC4406B5-FA8F-426B-B30E-DE499E03DF8B}.Release|x64.Build.0 = Release|x64
+		{EC4406B5-FA8F-426B-B30E-DE499E03DF8B}.Release|x86.ActiveCfg = Release|Win32
+		{EC4406B5-FA8F-426B-B30E-DE499E03DF8B}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
