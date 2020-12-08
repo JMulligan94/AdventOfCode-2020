@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "06-CustomCustoms", "06-Cust
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "07-HandyHaversacks", "07-HandyHaversacks\07-HandyHaversacks.vcxproj", "{C89FED15-C21B-4FE7-8CBE-0F6F2225DDB3}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "08-HandheldHalting", "08-HandheldHalting\08-HandheldHalting.vcxproj", "{F71D97AB-74ED-4468-BD0A-AFCD5198DF23}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -81,6 +83,14 @@ Global
 		{C89FED15-C21B-4FE7-8CBE-0F6F2225DDB3}.Release|x64.Build.0 = Release|x64
 		{C89FED15-C21B-4FE7-8CBE-0F6F2225DDB3}.Release|x86.ActiveCfg = Release|Win32
 		{C89FED15-C21B-4FE7-8CBE-0F6F2225DDB3}.Release|x86.Build.0 = Release|Win32
+		{F71D97AB-74ED-4468-BD0A-AFCD5198DF23}.Debug|x64.ActiveCfg = Debug|x64
+		{F71D97AB-74ED-4468-BD0A-AFCD5198DF23}.Debug|x64.Build.0 = Debug|x64
+		{F71D97AB-74ED-4468-BD0A-AFCD5198DF23}.Debug|x86.ActiveCfg = Debug|Win32
+		{F71D97AB-74ED-4468-BD0A-AFCD5198DF23}.Debug|x86.Build.0 = Debug|Win32
+		{F71D97AB-74ED-4468-BD0A-AFCD5198DF23}.Release|x64.ActiveCfg = Release|x64
+		{F71D97AB-74ED-4468-BD0A-AFCD5198DF23}.Release|x64.Build.0 = Release|x64
+		{F71D97AB-74ED-4468-BD0A-AFCD5198DF23}.Release|x86.ActiveCfg = Release|Win32
+		{F71D97AB-74ED-4468-BD0A-AFCD5198DF23}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
