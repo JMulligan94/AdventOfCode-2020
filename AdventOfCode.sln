@@ -21,6 +21,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "08-HandheldHalting", "08-Ha
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "09-EncodingError", "09-EncodingError\09-EncodingError.vcxproj", "{281F06D2-F942-43ED-9518-D6C3CD4773DF}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "10-AdapterArray", "10-AdapterArray\10-AdapterArray.vcxproj", "{8DBE5A13-D606-4469-96EF-FB17E6F8DAE6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -101,6 +103,14 @@ Global
 		{281F06D2-F942-43ED-9518-D6C3CD4773DF}.Release|x64.Build.0 = Release|x64
 		{281F06D2-F942-43ED-9518-D6C3CD4773DF}.Release|x86.ActiveCfg = Release|Win32
 		{281F06D2-F942-43ED-9518-D6C3CD4773DF}.Release|x86.Build.0 = Release|Win32
+		{8DBE5A13-D606-4469-96EF-FB17E6F8DAE6}.Debug|x64.ActiveCfg = Debug|x64
+		{8DBE5A13-D606-4469-96EF-FB17E6F8DAE6}.Debug|x64.Build.0 = Debug|x64
+		{8DBE5A13-D606-4469-96EF-FB17E6F8DAE6}.Debug|x86.ActiveCfg = Debug|Win32
+		{8DBE5A13-D606-4469-96EF-FB17E6F8DAE6}.Debug|x86.Build.0 = Debug|Win32
+		{8DBE5A13-D606-4469-96EF-FB17E6F8DAE6}.Release|x64.ActiveCfg = Release|x64
+		{8DBE5A13-D606-4469-96EF-FB17E6F8DAE6}.Release|x64.Build.0 = Release|x64
+		{8DBE5A13-D606-4469-96EF-FB17E6F8DAE6}.Release|x86.ActiveCfg = Release|Win32
+		{8DBE5A13-D606-4469-96EF-FB17E6F8DAE6}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
