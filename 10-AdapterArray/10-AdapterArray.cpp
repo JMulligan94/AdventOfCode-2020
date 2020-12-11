@@ -9,40 +9,28 @@
 using namespace std;
 
 const int c_startJoltage = 0;
+const int c_maxRange = 3;
 vector<int> m_orderedAdapters;
-size_t m_adaptersSize;
 
-void GetNumArrangements(long long& numArrangements, int targetAdapter, int startIndex, int startAdapter)
+// Get the number of arrangements for a given number of adapters
+long long GetNumArrangements(int num, int currentIndex = 0)
 {
-	if (startAdapter == targetAdapter)
+	if (currentIndex == num)
 	{
-		numArrangements++;
-		return;
+		return 1;
 	}
 
-	for (int i = 1; i <= 3; ++i)
+	long long numArrangements = 0;
+
+	for (int i = 1; i <= c_maxRange; ++i)
 	{
-		int indexToCheck = startIndex + i;
-		if (indexToCheck < m_adaptersSize)
+		int indexToCheck = currentIndex + i;
+		if (indexToCheck <= num)
 		{
-			int nextAdapter = m_orderedAdapters[indexToCheck];
-			int diff = nextAdapter - startAdapter;
-			if (diff <= 3)
-				GetNumArrangements(numArrangements, targetAdapter, indexToCheck, nextAdapter);
-			else
-				return;
+			numArrangements += GetNumArrangements(num, indexToCheck);
 		}
 	}
-}
-
-void GetNumArrangementsForRange(long long& numArrangements, int start, int end)
-{
-	cout << "=== Arrangements for range " << start << " (" << m_orderedAdapters[start] << ") - " 
-		<< end << " (" << m_orderedAdapters[end] << ") ===" << endl;
-	int startAdapter = m_orderedAdapters[start];
-	int targetAdapter = m_orderedAdapters[end];
-	GetNumArrangements(numArrangements, targetAdapter, start, startAdapter);
-	cout << numArrangements << endl;
+	return numArrangements;
 }
 
 int compare(const void* a, const void* b)
@@ -53,8 +41,9 @@ int compare(const void* a, const void* b)
 int main()
 {
 	vector<int> adapters;
-	//ifstream inputStream("input.txt");
-	ifstream inputStream("test.txt");
+	ifstream inputStream("input.txt");
+	//ifstream inputStream("test.txt");
+	//ifstream inputStream("test2.txt");
 	if (inputStream.is_open())
 	{
 		string line;
@@ -64,79 +53,73 @@ int main()
 		}
 	}
 	
+	// Order the adapters by joltage
 	m_orderedAdapters = adapters;
 	m_orderedAdapters.push_back(0);
 	std::qsort(&m_orderedAdapters[0], m_orderedAdapters.size(), sizeof(int), compare);
-	m_adaptersSize = m_orderedAdapters.size();
+	m_orderedAdapters.push_back(m_orderedAdapters.back() + 3);
 
-	for (int i = 0; i < m_orderedAdapters.size(); ++i)
+	// Keep track of the running differences in joltage between consecutive adapters
+	vector<int> runningDiffs;
+	int joltDiff1 = 0;
+	int joltDiff3 = 0;
+	for (int i = 0; i < (int)m_orderedAdapters.size() - 1; ++i)
 	{
-		cout << i << " - " << m_orderedAdapters[i] << endl;
-	}
+		int currentAdapter = m_orderedAdapters[i];
+		int nextAdapter = m_orderedAdapters[i + 1];
 
-	vector<pair<int, int>> nonThreeGapRanges;
+		int diffJoltage = nextAdapter - currentAdapter;
+
+		runningDiffs.push_back(diffJoltage);
+
+		if (diffJoltage == 1)
+			joltDiff1++;
+		else if (diffJoltage == 3)
+			joltDiff3++;
+	}
 
 	{
 		// Part One
 		cout << "=== Part 1 ===" << endl;
-
-		int startRange = 0;
-		bool prevWasThree = false;
-		int num1JoltDiff = 0;
-		int num3JoltDiff = 1; // Device built-in is always +3 to final
-		for (int i = 0; i < m_orderedAdapters.size()-1; ++i)
-		{
-			int currentAdapter = m_orderedAdapters[i];
-			int nextAdapter = m_orderedAdapters[i+1];
-
-			int diffJoltage = nextAdapter - currentAdapter;
-
-			if (diffJoltage == 3)
-			{
-				if (!prevWasThree)
-					nonThreeGapRanges.push_back(pair<int, int>(startRange, i));
-				num3JoltDiff++;
-				prevWasThree = true;
-			}
-			else
-			{
-				if (prevWasThree)
-					startRange = i;
-				
-				prevWasThree = false;
-				if (diffJoltage == 1)
-					num1JoltDiff++;
-			}
-		}
-
-		cout << "Number of 1 joltage differences: " << num1JoltDiff << endl;
-		cout << "Number of 3 joltage differences: " << num3JoltDiff << endl;
-		cout << "Answer is: " << (num1JoltDiff * num3JoltDiff) << endl << endl;
+		cout << "Number of 1 joltage differences: " << joltDiff1 << endl;
+		cout << "Number of 3 joltage differences: " << joltDiff3 << endl;
+		cout << "Answer is: " << (joltDiff1 * joltDiff3) << endl << endl;
 	}
+
 
 	{
 		// Part Two
 		cout << "=== Part 2 ===" << endl;
-		vector<long long> rangeArrangements;
-		for (int i = 0; i < nonThreeGapRanges.size(); ++i)
-		{
-			int startIndex = nonThreeGapRanges[i].first;
-			int endIndex = nonThreeGapRanges[i].second;
 
-			long long numArrangements = 0;
-			GetNumArrangementsForRange(numArrangements, startIndex, endIndex);
-			rangeArrangements.push_back(numArrangements);
+		// Calculate the different numbers of arrangements for each quantity of consecutive adapters
+		vector<long long> arrangementSequences;
+		for (int i = 0; i < 15; ++i)
+		{
+			long long numArrangements = GetNumArrangements(i);
+			arrangementSequences.push_back(numArrangements);
+			cout << " Arrangements for " << i << " = " << numArrangements << endl;
 		}
 
-		unsigned long long total = rangeArrangements[0];
-		for (int i = 1; i < rangeArrangements.size(); ++i)
+		// Run through the ordered adapters, counting the amounts of consecutive 1s
+		long long totalArrangements = 0;
+		int running1s = 0;
+		for (int i = 0; i < (int)runningDiffs.size(); ++i)
 		{
-			total *= rangeArrangements[i];
-			cout << total << endl;
+			if (runningDiffs[i] == 1)
+				running1s++;
+			else if (runningDiffs[i] == 3 && running1s > 0)
+			{
+				// We've hit a 3 and this is the end of a string of 1s!
+				// Use the cached arrangement amounts and multiply onto the amount of arrangements found so far
+				if (totalArrangements == 0)
+					totalArrangements = arrangementSequences[running1s];
+				else
+					totalArrangements *= arrangementSequences[running1s];
+				running1s = 0;
+			}
 		}
 
-		int i = 0;
-		//cout << "The number of possible adapter arrangements is: " << numberArrangements << endl;
+		cout << "The number of possible adapter arrangements is: " << totalArrangements << endl << endl;
 	}
 }
 
