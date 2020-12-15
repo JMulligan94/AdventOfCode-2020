@@ -31,6 +31,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "13-ShuttleSearch", "13-Shut
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "14-DockingData", "14-DockingData\14-DockingData.vcxproj", "{C308AE31-C5E9-41D0-83FC-F9C2A5B8283F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "15-RambunctiousRecitation", "15-RambunctiousRecitation\15-RambunctiousRecitation.vcxproj", "{C7EB38CD-8106-4C32-BC00-E4D7780D1435}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -151,6 +153,14 @@ Global
 		{C308AE31-C5E9-41D0-83FC-F9C2A5B8283F}.Release|x64.Build.0 = Release|x64
 		{C308AE31-C5E9-41D0-83FC-F9C2A5B8283F}.Release|x86.ActiveCfg = Release|Win32
 		{C308AE31-C5E9-41D0-83FC-F9C2A5B8283F}.Release|x86.Build.0 = Release|Win32
+		{C7EB38CD-8106-4C32-BC00-E4D7780D1435}.Debug|x64.ActiveCfg = Debug|x64
+		{C7EB38CD-8106-4C32-BC00-E4D7780D1435}.Debug|x64.Build.0 = Debug|x64
+		{C7EB38CD-8106-4C32-BC00-E4D7780D1435}.Debug|x86.ActiveCfg = Debug|Win32
+		{C7EB38CD-8106-4C32-BC00-E4D7780D1435}.Debug|x86.Build.0 = Debug|Win32
+		{C7EB38CD-8106-4C32-BC00-E4D7780D1435}.Release|x64.ActiveCfg = Release|x64
+		{C7EB38CD-8106-4C32-BC00-E4D7780D1435}.Release|x64.Build.0 = Release|x64
+		{C7EB38CD-8106-4C32-BC00-E4D7780D1435}.Release|x86.ActiveCfg = Release|Win32
+		{C7EB38CD-8106-4C32-BC00-E4D7780D1435}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
