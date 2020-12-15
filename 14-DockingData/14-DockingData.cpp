@@ -11,11 +11,11 @@
 
 using namespace std;
 
-const const char* c_inputFile = "Input.txt";
-const const char* c_testFile = "Test2.txt";
+const char* c_inputFile = "Input.txt";
+const char* c_testFile = "Test2.txt";
 
-const const char* c_maskLinePrefix = "mask = ";
-const const char* c_memLinePrefix = "mem[";
+const char* c_maskLinePrefix = "mask = ";
+const char* c_memLinePrefix = "mem[";
 
 string m_maskString;
 
@@ -85,7 +85,7 @@ void WriteToMemoryWithAddressMask(uint64_t address, uint64_t value, bool print)
 
 	uint64_t baseResultAddress = binaryAddress.to_ullong();
 
-	vector<uint64_t> results(pow(2, floatingBits.size()));
+	vector<uint64_t> results((size_t)pow(2, floatingBits.size()));
 	for (int i = 0; i < results.size(); ++i)
 		results[i] = baseResultAddress;
 
@@ -109,7 +109,7 @@ void WriteToMemoryWithAddressMask(uint64_t address, uint64_t value, bool print)
 
 	for (int i = 0; i < floatingBits.size(); ++i)
 	{
-		int interval = pow(2, i);
+		int interval = (int)pow(2, i);
 		uint64_t bit = (uint64_t)1 << floatingBits[i];
 		int bitFactor = 0;
 		int intervalCount = interval;
@@ -175,11 +175,11 @@ int main()
 				int memValue = 0;
 
 				// mem set line
-				int startMemAddress = line.find('[') + 1;
-				int endMemAddress = line.find(']');
+				int startMemAddress = (int)line.find('[') + 1;
+				int endMemAddress = (int)line.find(']');
 				memAddress = stoi(line.substr(startMemAddress, (size_t)(endMemAddress - startMemAddress)));
 
-				int startMemValue = line.find('=') + 2;
+				int startMemValue = (int)line.find('=') + 2;
 				memValue = stoi(line.substr(startMemValue));
 
 				WriteToMemoryWithValueMask(memAddress, memValue, false);

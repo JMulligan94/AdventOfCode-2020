@@ -33,7 +33,7 @@ struct Group
 			for (int i = 0; i < (int)commonVec.size(); ++i)
 			{
 				char answer = commonVec[i];
-				int findResult = answers.find(answer);
+				int findResult = (int)answers.find(answer);
 
 				// If not found in answers, remove from common set
 				if (findResult == -1)

@@ -9,8 +9,8 @@
 
 using namespace std;
 
-const const char* c_inputFile = "Input.txt";
-const const char* c_testFile = "Test.txt";
+const char* c_inputFile = "Input.txt";
+const char* c_testFile = "Test.txt";
 
 struct MinuteSchedule
 {
@@ -21,7 +21,7 @@ void ParseLineIntoSchedule(vector<int>& schedule, const string& line)
 {
 	string busIntervalsStr = line;
 
-	int delimiterIndex = busIntervalsStr.find(',');
+	int delimiterIndex = (int)busIntervalsStr.find(',');
 	string currentInterval;
 	while (delimiterIndex != -1)
 	{
@@ -31,7 +31,7 @@ void ParseLineIntoSchedule(vector<int>& schedule, const string& line)
 		else
 			schedule.push_back(stoi(currentInterval));
 		busIntervalsStr = busIntervalsStr.substr(delimiterIndex + 1);
-		delimiterIndex = busIntervalsStr.find(',');
+		delimiterIndex = (int)busIntervalsStr.find(',');
 	}
 
 	if (busIntervalsStr[0] == 'x')

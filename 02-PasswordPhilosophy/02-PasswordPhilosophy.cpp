@@ -80,12 +80,12 @@ int main()
 		while (getline(inputStream, line))
 		{
 			// Split line into range - char -  password
-			int spaceIndex = line.find(' ');
-			int passwordIndex = line.find(':') + 2;
+			int spaceIndex = (int)line.find(' ');
+			int passwordIndex = (int)line.find(':') + 2;
 
 			// Get two integers from range string
 			string rangeString = line.substr(0, spaceIndex);
-			int dashIndex = rangeString.find('-');
+			int dashIndex = (int)rangeString.find('-');
 			int a = stoi(rangeString.substr(0, dashIndex));
 			int b = stoi(rangeString.substr(dashIndex + 1, rangeString.size() - (dashIndex + 1)));
 

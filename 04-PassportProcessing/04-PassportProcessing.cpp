@@ -42,7 +42,7 @@ struct Passport
 
 	void SetPassportInfo(string keyValuePair)
 	{
-		int splitter = keyValuePair.find(':');
+		int splitter = (int)keyValuePair.find(':');
 		string key = keyValuePair.substr(0, splitter);
 		string value = keyValuePair.substr(splitter + 1, keyValuePair.size() - (splitter + 1));
 
@@ -236,7 +236,7 @@ int main()
 			if (!line.empty())
 			{
 				// Iterate over key-value pairs on line
-				int index = line.rfind(' ');
+				int index = (int)line.rfind(' ');
 				vector<string> keyValuePairs;
 				string keyValue = line;
 				while (index != -1)
@@ -244,7 +244,7 @@ int main()
 					keyValue = line.substr(index+1);
 					currentPassport.SetPassportInfo(keyValue);
 					line = line.substr(0, index);
-					index = line.rfind(' ');
+					index = (int)line.rfind(' ');
 				}
 				currentPassport.SetPassportInfo(line);
 			}
