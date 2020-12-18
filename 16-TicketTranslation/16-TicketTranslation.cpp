@@ -98,7 +98,7 @@ public:
 		vector<int> valuesToCheck = m_values;
 		for (TicketField field : fields)
 		{
-			for (int i = valuesToCheck.size() - 1; i >= 0; --i)
+			for (int i = (int)valuesToCheck.size() - 1; i >= 0; --i)
 			{
 				int value = valuesToCheck[i];
 				if (field.IsValueValid(value))
