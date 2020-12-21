@@ -37,6 +37,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "16-TicketTranslation", "16-
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "17-ConwayCubes", "17-ConwayCubes\17-ConwayCubes.vcxproj", "{2A452FCE-BE53-46C2-820E-42D2E1991145}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "18-OperationOrder", "18-OperationOrder\18-OperationOrder.vcxproj", "{85FD9AA1-37F7-4B63-B650-00296CDDE1B0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -181,6 +183,14 @@ Global
 		{2A452FCE-BE53-46C2-820E-42D2E1991145}.Release|x64.Build.0 = Release|x64
 		{2A452FCE-BE53-46C2-820E-42D2E1991145}.Release|x86.ActiveCfg = Release|Win32
 		{2A452FCE-BE53-46C2-820E-42D2E1991145}.Release|x86.Build.0 = Release|Win32
+		{85FD9AA1-37F7-4B63-B650-00296CDDE1B0}.Debug|x64.ActiveCfg = Debug|x64
+		{85FD9AA1-37F7-4B63-B650-00296CDDE1B0}.Debug|x64.Build.0 = Debug|x64
+		{85FD9AA1-37F7-4B63-B650-00296CDDE1B0}.Debug|x86.ActiveCfg = Debug|Win32
+		{85FD9AA1-37F7-4B63-B650-00296CDDE1B0}.Debug|x86.Build.0 = Debug|Win32
+		{85FD9AA1-37F7-4B63-B650-00296CDDE1B0}.Release|x64.ActiveCfg = Release|x64
+		{85FD9AA1-37F7-4B63-B650-00296CDDE1B0}.Release|x64.Build.0 = Release|x64
+		{85FD9AA1-37F7-4B63-B650-00296CDDE1B0}.Release|x86.ActiveCfg = Release|Win32
+		{85FD9AA1-37F7-4B63-B650-00296CDDE1B0}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
