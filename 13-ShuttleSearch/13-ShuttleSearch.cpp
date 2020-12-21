@@ -44,11 +44,6 @@ struct Schedule
 	vector<int> m_buses;
 };
 
-void ParseLineIntoSchedule(vector<int>& schedule, const string& line)
-{
-	
-}
-
 uint64_t GetConsecutiveBusTime(const vector<int>& schedule)
 {
 	uint64_t currentTime = 0; // Current time we're checking

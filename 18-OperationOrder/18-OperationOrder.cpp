@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <vector>
-#include <set>
 #include <fstream>
 #include <string>
 #include <stdint.h>
@@ -20,6 +19,7 @@ public:
 	virtual uint64_t PrioritiseAdditionResolve() const = 0;
 };
 
+// Simple int operand - holds a single int value
 class IntOperand : public Operand
 {
 public:
@@ -44,10 +44,13 @@ private:
 	uint64_t m_value;
 };
 
+// More complex operand reprenting an expression to be resolved
 class Expression : public Operand
 {
 public:
 	Expression() = default;
+
+	// Parse line into an expression - splitting operands and operators
 	Expression(string line)
 	{
 		m_expression = line;
@@ -118,8 +121,10 @@ public:
 	}
 
 	// Inherited via Operand
+	// Resolves left-to-right no matter the operators
 	virtual uint64_t ChronologicalResolve() const override
 	{
+		// Iterate from left to right and calculate new result
 		uint64_t result = m_operands.front()->ChronologicalResolve();
 		for (int i = 1; i < m_operands.size(); ++i)
 		{
@@ -144,32 +149,47 @@ public:
 	}
 
 	// Inherited via Operand
+	// Resolve all additions before moving onto multiplications
 	virtual uint64_t PrioritiseAdditionResolve() const override
 	{
 		vector<Operand*> localOperands = m_operands;
 		vector<OperatorType> localOperatorType = m_operators;
-		vector<int> createdOperators;
+		vector<bool> createdOperandIndices(localOperands.size());
 
 		// Resolve all additions
 		for (int i = 0; i < localOperands.size()-1; ++i)
 		{
-			if (i < localOperatorType.size())
+			// If addition - resolve the addition and remove old operands/operator
+			// Replace 2 old operands with 1 resolved one
+			if (localOperatorType[i] == ADDITION)
 			{
-				if (localOperatorType[i] == ADDITION)
-				{
-					uint64_t operandA = localOperands[i]->PrioritiseAdditionResolve();
-					uint64_t operandB = localOperands[i + 1]->PrioritiseAdditionResolve();
+				uint64_t operandA = localOperands[i]->PrioritiseAdditionResolve();
+				uint64_t operandB = localOperands[i + 1]->PrioritiseAdditionResolve();
 
-					localOperatorType.erase(localOperatorType.begin() + i);
+				// Delete old operands if they were created in this function
+				if (createdOperandIndices[i])
+					delete localOperands[i];
 
-					localOperands.erase(localOperands.begin() + i);
-					localOperands.erase(localOperands.begin() + i);
-					localOperands.insert(localOperands.begin() + i, new IntOperand(operandA + operandB));
-					createdOperators.push_back(i);
+				if (createdOperandIndices[i + 1])
+					delete localOperands[i + 1];
+
+				createdOperandIndices[i] = false;
+				createdOperandIndices[i+1] = false;
+
+				// Remove two operands involved in the above calculation
+				localOperands.erase(localOperands.begin() + i);
+				localOperands.erase(localOperands.begin() + i);
+
+				// Insert the newly combined one - and record we created this ptr
+				localOperands.insert(localOperands.begin() + i, new IntOperand(operandA + operandB));
+				createdOperandIndices[i] = true;
+
+				// Remove operator
+				localOperatorType.erase(localOperatorType.begin() + i);
+
 					
-					i--;
-					continue;
-				}
+				i--;
+				continue;
 			}
 		}
 
@@ -178,6 +198,16 @@ public:
 		for (int i = 1; i < localOperands.size(); ++i)
 		{
 			result *= localOperands[i]->PrioritiseAdditionResolve();
+		}
+
+		// Delete any left over locally created operands
+		for (int i = 0; i < localOperands.size(); ++i)
+		{
+			if (createdOperandIndices[i])
+			{
+				delete localOperands[i];
+				localOperands[i] = nullptr;
+			}
 		}
 
 		return result;
@@ -228,7 +258,7 @@ int main()
 			answerSum += answer;
 		}
 
-		cout << endl << "Sum of all answers = " << answerSum << endl << endl;
+		cout << "Sum of all answers = " << answerSum << endl << endl;
 	}
 
 
@@ -238,13 +268,13 @@ int main()
 		uint64_t answerSum = 0;
 		for (int i = 0; i < expressions.size(); ++i)
 		{
-			cout << "Expression: " << expressions[i]->GetString() << endl;
+			//cout << "Expression: " << expressions[i]->GetString() << endl;
 			uint64_t answer = expressions[i]->PrioritiseAdditionResolve();
-			cout << "Answer: " << answer << endl << endl;
+			//cout << "Answer: " << answer << endl << endl;
 			answerSum += answer;
 		}
 
-		cout << endl << "Sum of all answers = " << answerSum << endl << endl;
+		cout << "Sum of all answers = " << answerSum << endl << endl;
 	}
 
 	for (int i = 0; i < expressions.size(); ++i)
