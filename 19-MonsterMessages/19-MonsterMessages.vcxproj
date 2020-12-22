@@ -42,7 +42,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -143,10 +143,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Input.txt" />
-    <Text Include="Input2.txt" />
-    <Text Include="Test.txt" />
-    <Text Include="Test2After.txt" />
-    <Text Include="Test2Before.txt" />
+    <Text Include="Test2.txt" />
+    <Text Include="TestA.txt" />
+    <Text Include="TestB.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

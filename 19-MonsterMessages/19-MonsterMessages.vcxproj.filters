@@ -23,16 +23,13 @@
     <Text Include="Input.txt">
       <Filter>Resource Files</Filter>
     </Text>
-    <Text Include="Test.txt">
+    <Text Include="TestA.txt">
       <Filter>Resource Files</Filter>
     </Text>
-    <Text Include="Test2After.txt">
+    <Text Include="TestB.txt">
       <Filter>Resource Files</Filter>
     </Text>
-    <Text Include="Test2Before.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="Input2.txt">
+    <Text Include="Test2.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
