@@ -13,6 +13,9 @@ using namespace std;
 const char* c_inputFile = "Input.txt";
 const char* c_testFile = "Test.txt";
 
+const char* c_test2Before = "Test2Before.txt";
+const char* c_test2After = "Test2After.txt";
+
 class Rule;
 vector<Rule*> m_rules;
 vector<string> m_messages;
@@ -120,12 +123,12 @@ public:
 
 			for (string first : firstMsgs)
 			{
-				string msg = first;
 				if (secondMsgs.empty())
-					m_cachedValidMsgs.push_back(msg);
+					m_cachedValidMsgs.push_back(first);
 
 				for (string second : secondMsgs)
 				{
+					string msg = first;
 					msg.append(second);
 					m_cachedValidMsgs.push_back(msg);
 				}
@@ -149,12 +152,12 @@ public:
 
 			for (string first : firstMsgs)
 			{
-				string msg = first;
 				if (secondMsgs.empty())
-					m_cachedValidMsgs.push_back(msg);
+					m_cachedValidMsgs.push_back(first);
 
 				for (string second : secondMsgs)
 				{
+					string msg = first;
 					msg.append(second);
 					m_cachedValidMsgs.push_back(msg);
 				}
@@ -194,7 +197,7 @@ private:
 
 int main()
 {
-	ifstream inputStream(c_inputFile);
+	ifstream inputStream(c_test2After);
 	if (inputStream.is_open())
 	{
 		string line;
@@ -222,15 +225,21 @@ int main()
 		// Fixup all rules
 		for (Rule* rule : m_rules)
 		{
-			rule->Fixup();
+			if (rule != nullptr)
+				rule->Fixup();
 		}
 
+		int numMatch = 0;
 		for (string message : m_messages)
 		{
 			bool messageValid = m_rules[0]->IsMessageValid(message);
 			if (messageValid)
+			{
 				cout << "MATCH: ";
+				numMatch++;
+			}
 			cout << "Checking: " << message << endl;
 		}
+		cout << endl << "Found " << numMatch << " matches" << endl;
 	}
 }
