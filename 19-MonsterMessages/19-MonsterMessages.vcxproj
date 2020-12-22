@@ -143,6 +143,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Input.txt" />
+    <Text Include="Input2.txt" />
     <Text Include="Test.txt" />
     <Text Include="Test2After.txt" />
     <Text Include="Test2Before.txt" />

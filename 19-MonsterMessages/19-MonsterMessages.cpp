@@ -7,11 +7,13 @@
 #include <string>
 #include <stdint.h>
 #include <sstream>
+#include <regex>
 
 using namespace std;
 
 const char* c_inputFile = "Input.txt";
-const char* c_testFile = "Test.txt";
+const char* c_input2File = "Input2.txt";
+const char* c_testFile = "TestB.txt";
 
 const char* c_test2Before = "Test2Before.txt";
 const char* c_test2After = "Test2After.txt";
@@ -95,90 +97,75 @@ public:
 			m_criteriaB.second = m_rules[m_IdB.second];
 	}
 
-	void BuildStrings()
+	void BuildRegexString()
 	{
-		if (!m_cachedValidMsgs.empty())
+		if (!m_cachedRegex.empty())
 			return;
 
 		if (m_messageChar != '#')
 		{
-			m_cachedValidMsgs.push_back(string(1, m_messageChar));
+			m_cachedRegex = m_messageChar;
 			return;
 		}
 
+		string firstRegex;
 		{
-			vector<string> firstMsgs;
 			if (m_criteriaA.first != nullptr)
 			{
-				m_criteriaA.first->BuildStrings();
-				firstMsgs = m_criteriaA.first->m_cachedValidMsgs;
+				m_criteriaA.first->BuildRegexString();
+				firstRegex.append(m_criteriaA.first->GetRegex());
 			}
 
-			vector<string> secondMsgs;
 			if (m_criteriaA.second != nullptr)
 			{
-				m_criteriaA.second->BuildStrings();
-				secondMsgs = m_criteriaA.second->m_cachedValidMsgs;
-			}
-
-			for (string first : firstMsgs)
-			{
-				if (secondMsgs.empty())
-					m_cachedValidMsgs.push_back(first);
-
-				for (string second : secondMsgs)
-				{
-					string msg = first;
-					msg.append(second);
-					m_cachedValidMsgs.push_back(msg);
-				}
+				m_criteriaA.second->BuildRegexString();
+				firstRegex.append(m_criteriaA.second->GetRegex());
 			}
 		}
 
+		string secondRegex;
 		{
-			vector<string> firstMsgs;
 			if (m_criteriaB.first != nullptr)
 			{
-				m_criteriaB.first->BuildStrings();
-				firstMsgs = m_criteriaB.first->m_cachedValidMsgs;
+				m_criteriaB.first->BuildRegexString();
+				secondRegex.append(m_criteriaB.first->GetRegex());
 			}
 
-			vector<string> secondMsgs;
 			if (m_criteriaB.second != nullptr)
 			{
-				m_criteriaB.second->BuildStrings();
-				secondMsgs = m_criteriaB.second->m_cachedValidMsgs;
-			}
-
-			for (string first : firstMsgs)
-			{
-				if (secondMsgs.empty())
-					m_cachedValidMsgs.push_back(first);
-
-				for (string second : secondMsgs)
-				{
-					string msg = first;
-					msg.append(second);
-					m_cachedValidMsgs.push_back(msg);
-				}
+				m_criteriaB.second->BuildRegexString();
+				secondRegex.append(m_criteriaB.second->GetRegex());
 			}
 		}
+
+		string fullRegex;
+		fullRegex.append("(");
+
+		if (!firstRegex.empty())
+			fullRegex.append(firstRegex);
+
+		if (!firstRegex.empty() && !secondRegex.empty())
+			fullRegex.append("|");
+
+		if (!secondRegex.empty())
+			fullRegex.append(secondRegex);
+
+		fullRegex.append(")");
+
+		m_cachedRegex = fullRegex;
 	}
 
 	bool IsMessageValid(string message)
 	{
-		BuildStrings();
+		BuildRegexString();
 
-		for (string validMsg : m_cachedValidMsgs)
-		{
-			if (validMsg == message)
-				return true;
-		}
-		
-		return false;
+		const regex expression(m_cachedRegex);
+		return regex_match(message, expression);
 	}
 
 	int GetID() const { return m_id; }
+
+	string GetRegex() const { return m_cachedRegex; }
 
 private:
 	int m_id;
@@ -191,13 +178,13 @@ private:
 	pair<int, int> m_IdB;
 	pair<Rule*, Rule*> m_criteriaB;
 
-	vector<string> m_cachedValidMsgs;
+	string m_cachedRegex;
 
 };
 
 int main()
 {
-	ifstream inputStream(c_test2After);
+	ifstream inputStream(c_testFile);
 	if (inputStream.is_open())
 	{
 		string line;
@@ -240,6 +227,7 @@ int main()
 			}
 			cout << "Checking: " << message << endl;
 		}
-		cout << endl << "Found " << numMatch << " matches" << endl;
+		cout << endl << "Rule[0] regex = " << m_rules[0]->GetRegex() << endl;
+		cout << "Found " << numMatch << " matches" << endl;
 	}
 }
