@@ -11,7 +11,7 @@
 
 using namespace std;
 
-#define DEBUG_PRINT
+//#define DEBUG_PRINT
 
 // Tiles are:
 //		 /  \
@@ -22,7 +22,7 @@ using namespace std;
 //  sw \      / se
 //       \  /
 
-
+// Hex grid tile neighbours
 enum Direction
 {
 	E,
@@ -42,6 +42,7 @@ map<Direction, string> dirLabels = {
 	{Direction::SW, "South West"}
 };
 
+// Simple struct for storing x,y coords
 struct Coords
 {
 	Coords() = default;
@@ -59,9 +60,9 @@ struct Coords
 //	4,0		4,1		4,2		4,3
 
 vector<string> m_tiles;
-Coords m_referenceTile;
-int m_tileGridWidth = 1;
-vector<bool> m_offsetRows;
+Coords m_referenceTile; // Which tile do the directions start from
+int m_tileGridWidth = 1; // How wide is the grid
+vector<bool> m_offsetRows; // Store which rows are the offset rows (i.e. column 0 is to the north-east of row below it
 
 const char c_blackTile = 'B';
 const char c_whiteTile = 'W';
@@ -73,29 +74,34 @@ void FlipTile(const Coords& coords)
 #ifdef DEBUG_PRINT
 	cout << "FLIPPING: " << row << "," << col << endl;
 #endif
+	// If black, flip to white
+	// If white, flip to black
 	char currentValue = m_tiles[row][col];
 	m_tiles[row][col] = (currentValue == c_whiteTile) ? c_blackTile : c_whiteTile;
 }
 
 void GrowNorth()
 {
+	// Add new row to top of grid structure filled with white tiles
 	string newTiles;
 	newTiles.resize(m_tileGridWidth, 'W');
 	m_tiles.insert(m_tiles.begin(), newTiles);
 	m_referenceTile.m_row++; // Reference tile shunts down a row each time
-	m_offsetRows.insert(m_offsetRows.begin(), !m_offsetRows.front());
+	m_offsetRows.insert(m_offsetRows.begin(), !m_offsetRows.front()); // is opposite of current top row
 }
 
 void GrowSouth()
 {
+	// Add new row to bottom of grid structure filled with white tiles
 	string newTiles;
 	newTiles.resize(m_tileGridWidth, 'W');
 	m_tiles.push_back(newTiles);
-	m_offsetRows.push_back(!m_offsetRows.back());
+	m_offsetRows.push_back(!m_offsetRows.back()); // is opposite of current bottom row
 }
 
 void GrowWest()
 {
+	// Add new column to left of grid structure filled with white tiles
 	for (int i = 0; i < (int)m_tiles.size(); ++i)
 	{
 		m_tiles[i].insert(m_tiles[i].begin(), 'W');
@@ -106,6 +112,7 @@ void GrowWest()
 
 void GrowEast()
 {
+	// Add new column to right of grid structure filled with white tiles
 	for (int i = 0; i < (int)m_tiles.size(); ++i)
 	{
 		m_tiles[i].push_back('W');
@@ -113,13 +120,16 @@ void GrowEast()
 	m_tileGridWidth++;
 }
 
-void FlipTileAtOffset(const Coords& offset)
+// Grow the tile data structure until it accommodates the coords passed in
+// i.e. the column number could be passed in as a negative number, so grow to the 
+// west until that tile's column is in the data structure
+void ActualiseAndFlipTile(const Coords& coords)
 {
 #ifdef DEBUG_PRINT
-	cout << "Flipping tile at offset: " << offset.m_row << "," << offset.m_col << endl;
+	cout << "Flipping tile at offset: " << coords.m_row << "," << coords.m_col << endl;
 #endif
-	int row = offset.m_row;
-	int col = offset.m_col;
+	int row = coords.m_row;
+	int col = coords.m_col;
 #ifdef DEBUG_PRINT
 	cout << "Ref tile: " << m_referenceTile.m_row << "," << m_referenceTile.m_col << endl;
 #endif
@@ -160,29 +170,35 @@ void FlipTileAtOffset(const Coords& offset)
 			GrowEast();
 		}
 	}
+
 	FlipTile(Coords(row, col));
 }
 
-bool IsOffsetRow(int x)
+bool IsOffsetRow(int row)
 {
-	// Works for negative integers
-	bool oldValue = (x & 1) != 0;
-	bool newValue = false;
-	if (x >= 0 && x < (int)m_offsetRows.size())
+	bool isOffset = false;
+	// If row is within bounds of offset row vector, use that information
+	if (row >= 0 && row < (int)m_offsetRows.size())
 	{
-		newValue = m_offsetRows[x];
+		isOffset = m_offsetRows[row];
 	}
-	else if (x < 0)
+	else if (row < 0)
 	{
-		int diff = abs(x);
-		newValue = diff % 2 == 0 ? m_offsetRows.front() : !m_offsetRows.front();
+		// If row is above bounds of data structure, work out whether the row would be offset or not
+		// If difference is even, it would be the same as the first, since it alternates true, false, true etc.
+		// If odd, it's the opposite
+		int diff = abs(row);
+		isOffset = diff % 2 == 0 ? m_offsetRows.front() : !m_offsetRows.front();
 	}
 	else
 	{
-		int diff = x - ((int)m_offsetRows.size() - 1);
-		newValue = diff % 2 == 0 ? m_offsetRows.back() : !m_offsetRows.back();
+		// If row is below bounds of data structure, work out whether the row would be offset or not
+		// If difference is even, it would be the same as the last row, since it alternates true, false, true etc.
+		// If odd, it's the opposite
+		int diff = row - ((int)m_offsetRows.size() - 1);
+		isOffset = diff % 2 == 0 ? m_offsetRows.back() : !m_offsetRows.back();
 	}
-	return newValue;
+	return isOffset;
 	
 }
 
@@ -208,6 +224,7 @@ void PrintTiles()
 #endif
 }
 
+// Return coordinates for neighbour in given direction
 Coords GetNeighbourTileCoords(const Coords& coords, Direction direction)
 {
 	int row = coords.m_row;
@@ -314,6 +331,7 @@ void ParseLineIntoDirections(const string& line, vector<Direction>& directions)
 	}
 }
 
+// Iterate over structure and count black tiles
 int GetBlackTileCount()
 {
 	int count = 0;
@@ -329,9 +347,11 @@ int GetBlackTileCount()
 
 bool GetIsBlackTile(const Coords& coords)
 {
+	// If outside north/south bounds of structure, must be white
 	if (coords.m_row < 0 || coords.m_row >= (int)m_tiles.size())
 		return false;
 
+	// If outside east/west bounds of structure, must be white
 	if (coords.m_col < 0 || coords.m_col >= m_tileGridWidth)
 		return false;
 
@@ -391,6 +411,7 @@ void DoExhibitRules()
 			Coords currentCoords = Coords(row, col);
 			bool isBlackTile = GetIsBlackTile(currentCoords);
 
+			// Check all possible neighbour directions to count black tiles
 			int numBlackNeighbours = 0;
 			numBlackNeighbours += GetIsBlackTile(GetNeighbourTileCoords(currentCoords, Direction::E)) ? 1 : 0;
 			numBlackNeighbours += GetIsBlackTile(GetNeighbourTileCoords(currentCoords, Direction::W)) ? 1 : 0;
@@ -418,6 +439,7 @@ void DoExhibitRules()
 		}
 	}
 
+	// The rules are applied simultaneously to every tile - they are all flipped at the same time
 	for (Coords coordToFlip : tilesToFlip)
 	{
 		FlipTile(coordToFlip);
@@ -431,11 +453,11 @@ int main()
 {
 	vector<string> directionStrings;
 	vector<vector<Direction>> directionList;
-	ifstream inputStream(c_testFile);
+	ifstream inputStream(c_inputFile);
 	if (inputStream.is_open())
 	{
 		string line;
-		// Get fields
+		// Get directions
 		while (getline(inputStream, line))
 		{
 			vector<Direction> directions;
@@ -445,6 +467,7 @@ int main()
 		}
 	}
 
+	// Init ref tile and tile data structures
 	m_referenceTile = Coords(0, 0);
 	m_tiles.push_back(string(1, c_whiteTile));
 	m_offsetRows.push_back(false);
@@ -460,10 +483,10 @@ int main()
 #endif
 			i++;
 			// Start at reference tile
-			Coords offset = m_referenceTile;
+			Coords destTile = m_referenceTile;
 			for (auto dir : directions)
 			{
-				offset = GetNeighbourTileCoords(offset, dir);
+				destTile = GetNeighbourTileCoords(destTile, dir);
 			}
 
 #ifdef DEBUG_PRINT
@@ -471,13 +494,12 @@ int main()
 #endif
 
 			// Found destination tile from directions - flip it
-			FlipTileAtOffset(offset);
+			ActualiseAndFlipTile(destTile);
 
 #ifdef DEBUG_PRINT
 			PrintTiles();
-#endif
-
 			cout << "The number of black tiles is: " << GetBlackTileCount() << endl;
+#endif
 		}
 
 		cout << "The number of black tiles is: " << GetBlackTileCount() << endl;
@@ -486,11 +508,13 @@ int main()
 	{
 		// Part Two
 		cout << endl << "=== Part 2 ===" << endl;
-		const int c_numberOfDays = 10;
+		const int c_numberOfDays = 100;
 		int dayCount = 1;
 		while (dayCount <= c_numberOfDays)
 		{
+#ifdef DEBUG_PRINT
 			cout << endl << "=== Day " << dayCount << " ===" << endl;
+#endif
 			DoExhibitRules();
 			cout << "Day " << dayCount << ": " << GetBlackTileCount() << endl;
 			dayCount++;
