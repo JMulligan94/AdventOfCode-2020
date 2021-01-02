@@ -31,10 +31,19 @@ public:
 		FlipVert = 2
 	};
 
+	struct PossibleConnectionInfo
+	{
+		Tile* m_tile;
+		int m_rot;
+		int m_flipState;
+	};
+
 	struct Edge
 	{
 		string m_data;
-		bool m_foundNeighbour;
+		Tile* m_owningTile;
+		vector<PossibleConnectionInfo> m_possibleNeighbours;
+		Tile* m_connectedTo;
 	};
 
 	Tile(vector<string> lines)
@@ -64,19 +73,24 @@ public:
 
 	bool HasValidNeighbour(Direction neighbour) const
 	{
-		Edge& edge = GetEdge(neighbour);
-		string tileString = edge.m_data;
+		Edge* edge = GetEdge(neighbour);
+		string tileString = edge->m_data;
 
 		for (Tile* tile : m_tiles)
 		{
 			if (tile == this)
 				continue;
 
-			string oppositeString = tile->GetOppositeEdge(neighbour).m_data;
+			Edge* oppositeEdge = tile->GetOppositeEdge(neighbour);
+			string oppositeString = oppositeEdge->m_data;
 
 			if (tileString == oppositeString)
 			{
-				edge.m_foundNeighbour = true;
+				PossibleConnectionInfo possibleConnectionInfo;
+				possibleConnectionInfo.m_tile = oppositeEdge->m_owningTile;
+				possibleConnectionInfo.m_rot = m_rotation;
+				possibleConnectionInfo.m_flipState = m_flipState;
+				edge->m_possibleNeighbours.push_back(possibleConnectionInfo);
 				return true;
 			}
 		}
@@ -85,40 +99,40 @@ public:
 
 	void GetNeighbours(Direction neighbour, vector<Tile*>& neighbourTiles) const
 	{
-		Edge& edge = GetEdge(neighbour);
-		string tileString = edge.m_data;
+		Edge* edge = GetEdge(neighbour);
+		string tileString = edge->m_data;
 
 		for (Tile* tile : m_tiles)
 		{
 			if (tile == this)
 				continue;
 
-			string oppositeString = tile->GetOppositeEdge(neighbour).m_data;
+			string oppositeString = tile->GetOppositeEdge(neighbour)->m_data;
 
 			if (tileString == oppositeString)
 				neighbourTiles.push_back(tile);
 		}
 	}
 
-	Edge& GetEdge(Direction neighbour) const
+	Edge* GetEdge(Direction neighbour) const
 	{
 		switch (neighbour)
 		{
-			case Top:		return *m_top;
-			case Bottom:	return *m_bottom;
-			case Left:		return *m_left;
-			default:		return *m_right;
+			case Top:		return m_top;
+			case Bottom:	return m_bottom;
+			case Left:		return m_left;
+			default:		return m_right;
 		}
 	}
 
-	Edge& GetOppositeEdge(Direction neighbour) const
+	Edge* GetOppositeEdge(Direction neighbour) const
 	{
 		switch (neighbour)
 		{
-			case Top:		return *m_bottom;
-			case Bottom:	return *m_top;
-			case Left:		return *m_right;
-			default:		return *m_left;
+			case Top:		return m_bottom;
+			case Bottom:	return m_top;
+			case Left:		return m_right;
+			default:		return m_left;
 		}
 	}
 
@@ -152,6 +166,11 @@ public:
 			// Store right edge
 			m_right->m_data.push_back(line.back());
 		}
+
+		m_top->m_owningTile = this;
+		m_bottom->m_owningTile = this;
+		m_left->m_owningTile = this;
+		m_right->m_owningTile = this;
 	}
 
 	void FlipHorizontally()
@@ -167,9 +186,9 @@ public:
 		CacheEdges();
 
 		// Move found neighbour states
-		bool tempState = m_left->m_foundNeighbour;
-		m_left->m_foundNeighbour = m_right->m_foundNeighbour;
-		m_right->m_foundNeighbour = tempState;
+		auto tempState = m_left->m_possibleNeighbours;
+		m_left->m_possibleNeighbours = m_right->m_possibleNeighbours;
+		m_right->m_possibleNeighbours = tempState;
 	}
 
 	void FlipVertically()
@@ -182,9 +201,9 @@ public:
 		CacheEdges();
 
 		// Move found neighbour states
-		bool tempState = m_top->m_foundNeighbour;
-		m_top->m_foundNeighbour = m_bottom->m_foundNeighbour;
-		m_bottom->m_foundNeighbour = tempState;
+		auto tempState = m_top->m_possibleNeighbours;
+		m_top->m_possibleNeighbours = m_bottom->m_possibleNeighbours;
+		m_bottom->m_possibleNeighbours = tempState;
 	}
 
 	void Rotate90()
@@ -201,11 +220,14 @@ public:
 		CacheEdges();
 
 		// Move found neighbour states
-		bool tempState = m_top->m_foundNeighbour;
-		m_top->m_foundNeighbour = m_left->m_foundNeighbour;
-		m_left->m_foundNeighbour = m_bottom->m_foundNeighbour;
-		m_bottom->m_foundNeighbour = m_right->m_foundNeighbour;
-		m_right->m_foundNeighbour = tempState;
+		auto tempState = m_top->m_possibleNeighbours;
+		m_top->m_possibleNeighbours = m_left->m_possibleNeighbours;
+		m_left->m_possibleNeighbours = m_bottom->m_possibleNeighbours;
+		m_bottom->m_possibleNeighbours = m_right->m_possibleNeighbours;
+		m_right->m_possibleNeighbours = tempState;
+
+		m_rotation += 90;
+		m_rotation %= 360;
 	}
 
 	void SetFlipState(int flipState)
@@ -266,10 +288,10 @@ public:
 		}
 		SetFlipState(Original);
 
-		neighbourlessEdges -= m_top->m_foundNeighbour ? 1 : 0;
-		neighbourlessEdges -= m_bottom->m_foundNeighbour ? 1 : 0;
-		neighbourlessEdges -= m_left->m_foundNeighbour ? 1 : 0;
-		neighbourlessEdges -= m_right->m_foundNeighbour ? 1 : 0;
+		neighbourlessEdges -= !m_top->m_possibleNeighbours.empty() ? 1 : 0;
+		neighbourlessEdges -= !m_bottom->m_possibleNeighbours.empty() ? 1 : 0;
+		neighbourlessEdges -= !m_left->m_possibleNeighbours.empty() ? 1 : 0;
+		neighbourlessEdges -= !m_right->m_possibleNeighbours.empty() ? 1 : 0;
 		return neighbourlessEdges;
 	}
 
@@ -282,10 +304,44 @@ public:
 		}
 	}
 
+	void PrintNeighbours()
+	{
+		cout << endl << "=== Tile " << m_id << " neighbours ===" << endl;
+		
+		cout << "Left: ";
+		for (auto leftNeighbour : m_left->m_possibleNeighbours)
+			cout << leftNeighbour.m_tile->GetID() << "(" << leftNeighbour.m_rot << "|" << leftNeighbour.m_flipState << "),";
+		if (m_left->m_possibleNeighbours.empty())
+			cout << "-";
+		cout << endl;
+
+		cout << "Right: ";
+		for (auto rightNeighbour : m_right->m_possibleNeighbours)
+			cout << rightNeighbour.m_tile->GetID() << "(" << rightNeighbour.m_rot << "|" << rightNeighbour.m_flipState << "),";
+		if (m_right->m_possibleNeighbours.empty())
+			cout << "-";
+		cout << endl;
+
+		cout << "Top: ";
+		for (auto topNeighbour : m_top->m_possibleNeighbours)
+			cout << topNeighbour.m_tile->GetID() << "(" << topNeighbour.m_rot << "|" << topNeighbour.m_flipState << "),";
+		if (m_top->m_possibleNeighbours.empty())
+			cout << "-";
+		cout << endl;
+
+		cout << "Bottom: ";
+		for (auto bottomNeighbour : m_bottom->m_possibleNeighbours)
+			cout << bottomNeighbour.m_tile->GetID() << "(" << bottomNeighbour.m_rot << "|" << bottomNeighbour.m_flipState << "),";
+		if (m_bottom->m_possibleNeighbours.empty())
+			cout << "-";
+		cout << endl << endl;
+	}
+
 	int GetID() const { return m_id; }
 
 private:
 	int m_id;
+	int m_rotation;
 
 	vector<string> m_tileData;
 
@@ -310,7 +366,7 @@ void GetEdgesAndCorners(vector<Tile*>& edgeTiles, vector<Tile*>& cornerTiles)
 	for (Tile* tile : m_tiles)
 	{
 		int neighbourlessCount = tile->GetNeighbourlessEdgeCount();
-		cout << "Tile " << tile->GetID() << " has " << neighbourlessCount << " empty edges" << endl;
+		//cout << "Tile " << tile->GetID() << " has " << neighbourlessCount << " empty edges" << endl;
 		if (neighbourlessCount == 2)
 			cornerTiles.push_back(tile);
 		if (neighbourlessCount == 1)
@@ -320,7 +376,8 @@ void GetEdgesAndCorners(vector<Tile*>& edgeTiles, vector<Tile*>& cornerTiles)
 
 int main()
 {
-	ifstream inputStream(c_inputFile);
+	ifstream inputStream(c_testFile);
+	//ifstream inputStream(c_inputFile);
 	if (inputStream.is_open())
 	{
 		string line;
@@ -349,21 +406,43 @@ int main()
 	if (corners.size() != 4)
 		cout << "ERROR: Did not find 4 corner tiles" << endl;
 
-	uint64_t cornerProduct = 0;
-	if (!corners.empty())
-		cornerProduct = corners.front()->GetID();
-
-	for (int i = 1; i < (int)corners.size(); ++i)
-	{
-		cornerProduct *= corners[i]->GetID();;
-	}
-
 	for (int i = 0; i < (int)corners.size(); ++i)
 	{
 		cout << "Corner [" << i << "] = " << corners[i]->GetID() << endl;
+		corners[i]->PrintNeighbours();
 	}
 
-	cout << "Corner tile product is: " << cornerProduct << endl;
+	for (int i = 0; i < (int)edges.size(); ++i)
+	{
+		cout << "Edge [" << i << "] = " << edges[i]->GetID() << endl;
+		edges[i]->PrintNeighbours();
+	}
+
+	for (int i = 0; i < (int)m_tiles.size(); ++i)
+	{
+		cout << "Tile [" << i << "] = " << m_tiles[i]->GetID() << endl;
+		m_tiles[i]->PrintNeighbours();
+	}
+
+	{
+		// Part One
+		cout << endl << "=== Part 1 ===" << endl;
+		uint64_t cornerProduct = 0;
+		if (!corners.empty())
+			cornerProduct = corners.front()->GetID();
+
+		for (int i = 1; i < (int)corners.size(); ++i)
+		{
+			cornerProduct *= corners[i]->GetID();;
+		}
+		cout << "Corner tile product is: " << cornerProduct << endl;
+	}
+
+	{
+		// Part Two
+		cout << endl << "=== Part 2 ===" << endl;
+
+	}
 
 	// Delete any tiles
 	for (int i = 0; i < (int)m_tiles.size(); ++i)
