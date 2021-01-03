@@ -19,10 +19,6 @@ enum Direction
 	Right = 1 << 3
 };
 
-class PuzzlePiece;
-vector<PuzzlePiece*> m_allPieces;
-map<int, vector<PuzzlePiece*>> m_pieceConfigMap;
-
 class PuzzlePiece
 {
 public:
@@ -77,6 +73,7 @@ public:
 		m_right = nullptr;
 	}
 
+	// Create new edge data from full piece data
 	void CacheEdges()
 	{
 		if (m_top == nullptr)
@@ -109,6 +106,7 @@ public:
 		}
 	}
 
+	// Flip piece data horizontally
 	void FlipPiece()
 	{
 		for (int i = m_pieceData.size() - 1; i >= 0; --i)
@@ -127,6 +125,7 @@ public:
 		m_right->m_connectedTo = tempState;
 	}
 
+	// Rotate piece 90 degrees clockwise
 	void RotatePiece()
 	{
 		vector<string> oldData = m_pieceData;
@@ -148,48 +147,41 @@ public:
 		m_right->m_connectedTo = tempState;
 	}
 
-	bool ConnectsTop(PuzzlePiece* otherPiece)
+	// Attempt to connect with piece in specified direction if compatible
+	void TryConnectInDirection(PuzzlePiece* otherPiece, Direction direction)
 	{
-		if (m_top->m_data == otherPiece->m_bottom->m_data)
+		switch (direction)
 		{
-			m_top->m_connectedTo = otherPiece;
-			return true;
+			case Direction::Top:
+			{
+				if (m_top->m_data == otherPiece->m_bottom->m_data)
+					m_top->m_connectedTo = otherPiece;
+			}
+			break;
+			case Direction::Bottom:
+			{
+				if (m_bottom->m_data == otherPiece->m_top->m_data)
+					m_bottom->m_connectedTo = otherPiece;
+			}
+			break;
+			case Direction::Left:
+			{
+				if (m_left->m_data == otherPiece->m_right->m_data)
+					m_left->m_connectedTo = otherPiece;
+			}
+			break;
+			case Direction::Right:
+			{
+				if (m_right->m_data == otherPiece->m_left->m_data)
+					m_right->m_connectedTo = otherPiece;
+			}
+			break;
 		}
-		return false;
-	}
-
-	bool ConnectsBottom(PuzzlePiece* otherPiece)
-	{
-		if (m_bottom->m_data == otherPiece->m_top->m_data)
-		{
-			m_bottom->m_connectedTo = otherPiece;
-			return true;
-		}
-		return false;
-	}
-
-	bool ConnectsLeft(PuzzlePiece* otherPiece)
-	{
-		if (m_left->m_data == otherPiece->m_right->m_data)
-		{
-			m_left->m_connectedTo = otherPiece;
-			return true;
-		}
-		return false;
-	}
-
-	bool ConnectsRight(PuzzlePiece* otherPiece)
-	{
-		if (m_right->m_data == otherPiece->m_left->m_data)
-		{
-			m_right->m_connectedTo = otherPiece;
-			return true;
-		}
-		return false;
 	}
 
 	int GetOuterEdgeCount()
 	{
+		// Get amount of edges with no neighbours
 		int outerEdges = 0;
 		outerEdges += m_top->m_connectedTo == nullptr ? 1 : 0;
 		outerEdges += m_bottom->m_connectedTo == nullptr ? 1 : 0;
@@ -216,51 +208,8 @@ public:
 		}
 	}
 
-	void PrintTile()
-	{
-		cout << endl << "Piece " << m_id << ": " << endl;
-		for (string data : m_pieceData)
-		{
-			cout << data << endl;
-		}
-	}
-
-	void PrintNeighbours()
-	{
-		cout << endl << "=== Tile " << m_id << " neighbours ===" << endl;
-		
-		cout << "Left: ";
-		if (m_left->m_connectedTo != nullptr)
-			cout << m_left->m_connectedTo->GetID();
-		else
-			cout << "-";
-		cout << endl;
-
-		cout << "Right: ";
-		if (m_right->m_connectedTo != nullptr)
-			cout << m_right->m_connectedTo->GetID();
-		else
-			cout << "-";
-		cout << endl;
-
-		cout << "Top: ";
-		if (m_top->m_connectedTo != nullptr)
-			cout << m_top->m_connectedTo->GetID();
-		else
-			cout << "-";
-		cout << endl;
-
-		cout << "Bottom: ";
-		if (m_bottom->m_connectedTo != nullptr)
-			cout << m_bottom->m_connectedTo->GetID();
-		else
-			cout << "-";
-		cout << endl << endl;
-	}
-
-	int GetID() const { return m_id; }
-
-	PuzzlePiece* GetNeighbourPiece(Direction dir)
+	// Return piece connected to this piece in a certain direction
+	PuzzlePiece* GetConnectedPiece(Direction dir)
 	{
 		switch (dir)
 		{
@@ -271,6 +220,8 @@ public:
 		}
 		return nullptr;
 	}
+
+	int GetID() const { return m_id; }
 
 private:
 	int m_id;
@@ -283,34 +234,21 @@ private:
 	Edge* m_right;
 };
 
+// Class to represent an image assembled out of puzzle pieces
 class Image
 {
 public:
 	Image(const vector<vector<PuzzlePiece*>>& attachedPieces)
 	{
-		cout << "Attached pieces:" << endl;
-		for (auto& attachedPieceRow : attachedPieces)
-		{
-			for (auto& piece : attachedPieceRow)
-			{
-				piece->PrintTile();
-			}
-		}
-		cout << endl;
-
-		cout << "Attached borderless pieces:" << endl;
 		for (int pieceRow = 0; pieceRow < (int)attachedPieces.size(); ++pieceRow)
 		{
 			for (int pieceCol = 0; pieceCol < (int)attachedPieces[pieceRow].size(); ++pieceCol)
 			{
 				PuzzlePiece* tile = attachedPieces[pieceRow][pieceCol];
+
+				// Assemble with removed borders
 				vector<string> borderlessData;
 				tile->GetBorderlessTileData(borderlessData);
-				for (auto& piece : borderlessData)
-				{
-					cout << piece << endl;
-				}
-				cout << endl;
 
 				for (int i = 0; i < (int)borderlessData.size(); ++i)
 				{
@@ -333,13 +271,9 @@ public:
 		m_imageData = otherImage.m_imageData;
 	}
 
-	void SetImageData(const vector<string>& data)
-	{
-		m_imageData = data;
-	}
-
 	void MarkSeaMonsters(vector<pair<int, int>>& seaMonsterOffsets)
 	{
+		// Find all instances of sea monsters in the image and mark with 'O'
 		int seaMonsterWidth = c_seaMonsterData.front().size();
 		int seaMonsterHeight = c_seaMonsterData.size();
 
@@ -429,6 +363,7 @@ public:
 
 	int GetWaterRoughness() const
 	{
+		// Water roughness = amount of '#' left after sea monsters have been marked
 		int waterRoughness = 0;
 		for (auto& row : m_imageData)
 		{
@@ -453,6 +388,7 @@ public:
 
 	void RotateImage()
 	{
+		// Rotate image 90 degrees clockwise
 		vector<string> oldData = m_imageData;
 		for (int i = 0; i < (int)oldData.size(); ++i)
 		{
@@ -466,6 +402,7 @@ public:
 
 	void FlipImage()
 	{
+		// Flip image horizontally
 		for (int i = m_imageData.size() - 1; i >= 0; --i)
 		{
 			for (int j = 0; j < (int)m_imageData[i].length() / 2; j++)
@@ -486,6 +423,9 @@ private:
 	};
 };
 
+// All puzzle pieces, including rotated and flipped variants
+vector<PuzzlePiece*> m_allPieces;
+
 void ConnectPiecesToNeighbours()
 {
 	for (auto& piece : m_allPieces)
@@ -497,10 +437,11 @@ void ConnectPiecesToNeighbours()
 			if (pieceToCheck->GetID() == pieceID)
 				continue;
 
-			piece->ConnectsTop(pieceToCheck);
-			piece->ConnectsBottom(pieceToCheck);
-			piece->ConnectsLeft(pieceToCheck);
-			piece->ConnectsRight(pieceToCheck);
+			// Try to connect in all directions to this other piece
+			piece->TryConnectInDirection(pieceToCheck, Direction::Top);
+			piece->TryConnectInDirection(pieceToCheck, Direction::Bottom);
+			piece->TryConnectInDirection(pieceToCheck, Direction::Left);
+			piece->TryConnectInDirection(pieceToCheck, Direction::Right);
 		}
 	}
 }
@@ -519,128 +460,32 @@ void GetEdgeAndCornerPieces(vector<PuzzlePiece*>& edgePieces, vector<PuzzlePiece
 	}
 }
 
-PuzzlePiece* SearchPieces(vector<PuzzlePiece*> bag, const vector<Direction>& neighbourDirections, const vector<int>& neighbourIDs, const vector<Direction>& outerEdgeDirections, int pieceID = -1)
+// Get top-left piece to start off the jigsaw
+PuzzlePiece* GetStartingPiece(int pieceID = -1)
 {
 	vector<PuzzlePiece*> matchingPieces;
-	for (auto& piece : bag)
+	for (auto& piece : m_allPieces)
 	{
-		if (pieceID >= 0 && piece->GetID() != pieceID)
+		if (piece->GetID() != pieceID)
 			continue;
 
-		bool isValidPiece = true;
+		bool hasBottomPiece = piece->GetConnectedPiece(Direction::Bottom) != nullptr;
+		bool hasRightPiece = piece->GetConnectedPiece(Direction::Right) != nullptr;
 
-		for (int i = 0; i < (int)neighbourDirections.size(); ++i)
-		{
-			Direction dir = neighbourDirections[i];
-			PuzzlePiece* neighbourPiece = nullptr;
-			switch (dir)
-			{
-				case Direction::Top:
-				{
-					neighbourPiece = piece->GetNeighbourPiece(Direction::Top);
-				}
-				break;
-				case Direction::Bottom:
-				{
-					neighbourPiece = piece->GetNeighbourPiece(Direction::Bottom);
-				}
-				break;
-				case Direction::Left:
-				{
-					neighbourPiece = piece->GetNeighbourPiece(Direction::Left);
-				}
-				break;
-				case Direction::Right:
-				{
-					neighbourPiece = piece->GetNeighbourPiece(Direction::Right);
-				}
-				break;
-			}
-
-			if (neighbourPiece == nullptr)
-			{
-				isValidPiece = false;
-				continue;
-			}
-
-			if (neighbourIDs[i] >= 0 && neighbourPiece->GetID() != neighbourIDs[i])
-			{
-				isValidPiece = false;
-				continue;
-			}
-		}
-
-		if (isValidPiece)
+		if (hasBottomPiece && hasRightPiece)
 			matchingPieces.push_back(piece);
-	}
-
-	for (int i = 0; i < (int)matchingPieces.size(); ++i)
-	{
-		bool isValidPiece = true;
-		for (auto& outerEdgeDir : outerEdgeDirections)
-		{
-			PuzzlePiece* outerPiece = nullptr;
-			switch (outerEdgeDir)
-			{
-				case Direction::Top:
-				{
-					outerPiece = matchingPieces[i]->GetNeighbourPiece(Direction::Top);
-				}
-				break;
-				case Direction::Bottom:
-				{
-					outerPiece = matchingPieces[i]->GetNeighbourPiece(Direction::Bottom);
-				}
-				break;
-				case Direction::Left:
-				{
-					outerPiece = matchingPieces[i]->GetNeighbourPiece(Direction::Left);
-				}
-				break;
-				case Direction::Right:
-				{
-					outerPiece = matchingPieces[i]->GetNeighbourPiece(Direction::Right);
-				}
-				break;
-			}
-
-			if (outerPiece != nullptr)
-			{
-				isValidPiece = false;
-				break;
-			}
-		}
-
-		if (!isValidPiece)
-		{
-			matchingPieces.erase(matchingPieces.begin() + i);
-			--i;
-		}
 	}
 
 	// Return first matching piece
 	return !matchingPieces.empty() ? matchingPieces.front() : nullptr;
 }
 
-void RemovePiecesFromBag(vector<PuzzlePiece*>& bag, int id)
-{
-	for (int i = 0; i < (int)bag.size(); ++i)
-	{
-		if (bag[i]->GetID() == id)
-		{
-			bag.erase(bag.begin() + i);
-			--i;
-		}
-	}
-}
-
 const char* c_inputFile = "Input.txt";
 const char* c_testFile = "Test.txt";
-const char* c_seaMonsterTestFile = "SeaMonsterTest.txt";
 
 int main()
 {
-	ifstream inputStream(c_testFile);
+	ifstream inputStream(c_inputFile);
 	vector<PuzzlePiece*> initialPieces;
 	if (inputStream.is_open())
 	{
@@ -666,48 +511,45 @@ int main()
 	// Store all 8 configurations of each piece
 	for (PuzzlePiece* piece : initialPieces)
 	{
-		vector<PuzzlePiece*> pieceConfigs;
 		// Original
-		pieceConfigs.push_back(piece);
+		m_allPieces.push_back(piece);
 
 		// All rotations
 		PuzzlePiece* rotatedPiece = new PuzzlePiece(*piece);
 		for (int i = 0; i < 3; ++i)
 		{
 			rotatedPiece->RotatePiece();
-			pieceConfigs.push_back(rotatedPiece);
+			m_allPieces.push_back(rotatedPiece);
 			rotatedPiece = new PuzzlePiece(*rotatedPiece);
 		}
 		rotatedPiece->RotatePiece();
 
-		// Original rotation but flipped
+		// Flipped
 		PuzzlePiece* flippedPiece = rotatedPiece;
 		flippedPiece->FlipPiece();
-		pieceConfigs.push_back(flippedPiece);
+		m_allPieces.push_back(flippedPiece);
 
-		// Add all rotations after flip
+		// All flipped rotations
 		rotatedPiece = new PuzzlePiece(*flippedPiece);
 		for (int i = 0; i < 3; ++i)
 		{
 			rotatedPiece->RotatePiece();
-			pieceConfigs.push_back(rotatedPiece);
+			m_allPieces.push_back(rotatedPiece);
 			rotatedPiece = new PuzzlePiece(*rotatedPiece);
-		}
-
-		m_pieceConfigMap.emplace(piece->GetID(), pieceConfigs);
-		for (auto p : pieceConfigs)
-		{
-			m_allPieces.push_back(p);
 		}
 	}
 
+	// Assumes theres only one unique other piece that matches each piece
+	// Connects the pieces together
 	ConnectPiecesToNeighbours();
 
+	// Get edge pieces to determine size of jigsaw
+	// And corner pieces to start off the jigsaw
 	vector<PuzzlePiece*> cornerPieces;
 	vector<PuzzlePiece*> edgePieces;
 	GetEdgeAndCornerPieces(edgePieces, cornerPieces);
 
-	// Start assembling the jigsaw
+	// Start assembling the jigsaw!
 	vector<PuzzlePiece*> piecesBag = m_allPieces;
 	int jigsawWidth = (edgePieces.size() / (8 * 4)) + 2;
 	vector<vector<PuzzlePiece*>> jigsaw;
@@ -717,193 +559,37 @@ int main()
 		pieceRow.resize(jigsawWidth);
 	}
 
+	// ASSEMBLE!
 	int row = 0;
 	int col = 0;
-
-	// Get top-left corner piece - any corner with a right & down neighbour
-	int startingID = cornerPieces.front()->GetID();
-	{
-		vector<Direction> neighbourDirections = { Direction::Right, Direction::Bottom };
-		vector<int> neighbourIDs = { -1, -1 };
-		vector<Direction> outerDirections = { Direction::Left, Direction::Top };
-		jigsaw[row][col] = SearchPieces(piecesBag, neighbourDirections, neighbourIDs, outerDirections, startingID);
-		RemovePiecesFromBag(piecesBag, jigsaw[row][col]->GetID()); // Remove from bag of pieces
-	}
-	col++;
-
-	// ASSEMBLE EDGES
-	// Top edge
-	int lastPieceID = startingID;
-	while (col < jigsawWidth)
-	{
-		if (col < jigsawWidth - 1)
-		{
-			// Get next edge piece, must connect on left edge to last piece and have no connections on top edge
-			vector<Direction> neighbourDirections = { Direction::Left, Direction::Bottom, Direction::Right };
-			vector<int> neighbourIDs = { lastPieceID, -1, -1 };
-			vector<Direction> outerDirections = { Direction::Top };
-
-			PuzzlePiece* newPiece = SearchPieces(piecesBag, neighbourDirections, neighbourIDs, outerDirections, -1);
-			jigsaw[0][col] = newPiece;
-			lastPieceID = newPiece->GetID();
-			RemovePiecesFromBag(piecesBag, lastPieceID); // Remove from bag of pieces
-		}
-		else
-		{
-			// If last in row, must be the top-right corner piece
-			vector<Direction> neighbourDirections = { Direction::Left, Direction::Bottom }; // Has left and bottom neighbours
-			vector<int> neighbourIDs = { lastPieceID, -1 };	// Left must be prev piece but bottom can be anything
-			vector<Direction> outerDirections = { Direction::Top, Direction::Right };
-
-			PuzzlePiece* newPiece = SearchPieces(piecesBag, neighbourDirections, neighbourIDs, outerDirections, -1);
-			jigsaw[0][col] = newPiece;
-			lastPieceID = newPiece->GetID();
-			RemovePiecesFromBag(piecesBag, lastPieceID); // Remove from bag of pieces
-		}
-
-		col++;
-	}
-
-	// Left edge
-	col = 0;
-	row = 1;
-	lastPieceID = startingID;
 	while (row < jigsawWidth)
 	{
-		if (row < jigsawWidth - 1)
+		while (col < jigsawWidth)
 		{
-			// Get next edge piece, must connect on top edge to last piece and have no connections on left edge
-			vector<Direction> neighbourDirections = { Direction::Top, Direction::Right, Direction::Bottom };
-			vector<int> neighbourIDs = { lastPieceID, -1, -1 };
-			vector<Direction> outerDirections = { Direction::Left };
-
-			PuzzlePiece* newPiece = SearchPieces(piecesBag, neighbourDirections, neighbourIDs, outerDirections, -1);
-			jigsaw[row][0] = newPiece;
-			lastPieceID = newPiece->GetID();
-			RemovePiecesFromBag(piecesBag, lastPieceID); // Remove from bag of pieces
-		}
-		else
-		{
-			// Bottom-left corner piece
-			vector<Direction> neighbourDirections = { Direction::Top, Direction::Right };
-			vector<int> neighbourIDs = { lastPieceID, -1 };
-			vector<Direction> outerDirections = { Direction::Left, Direction::Bottom };
-
-			PuzzlePiece* newPiece = SearchPieces(piecesBag, neighbourDirections, neighbourIDs, outerDirections, -1);
-			jigsaw[row][0] = newPiece;
-			lastPieceID = newPiece->GetID();
-			RemovePiecesFromBag(piecesBag, lastPieceID); // Remove from bag of pieces
-		}
-		row++;
-	}
-
-	// Bottom edge
-	col = 1;
-	row = jigsawWidth - 1;
-	while (col < jigsawWidth)
-	{
-		if (col < jigsawWidth - 1)
-		{
-			// Get next edge piece, must connect on left edge to last piece and have no connections on bottom edge
-			vector<Direction> neighbourDirections = { Direction::Left, Direction::Top, Direction::Right };
-			vector<int> neighbourIDs = { lastPieceID, -1, -1 };
-			vector<Direction> outerDirections = { Direction::Bottom };
-
-			PuzzlePiece* newPiece = SearchPieces(piecesBag, neighbourDirections, neighbourIDs, outerDirections, -1);
-			jigsaw[row][col] = newPiece;
-			lastPieceID = newPiece->GetID();
-			RemovePiecesFromBag(piecesBag, lastPieceID); // Remove from bag of pieces
-		}
-		else
-		{
-			// If last in row, must be the bottom-right corner piece
-			vector<Direction> neighbourDirections = { Direction::Left, Direction::Top }; // Has left and bottom neighbours
-			vector<int> neighbourIDs = { lastPieceID, -1 };	// Left must be prev piece but bottom can be anything
-			vector<Direction> outerDirections = { Direction::Bottom, Direction::Right };
-
-			PuzzlePiece* newPiece = SearchPieces(piecesBag, neighbourDirections, neighbourIDs, outerDirections, -1);
-			jigsaw[row][col] = newPiece;
-			lastPieceID = newPiece->GetID();
-			RemovePiecesFromBag(piecesBag, lastPieceID); // Remove from bag of pieces
-		}
-
-		col++;
-	}
-
-	// Right edge
-	col = jigsawWidth - 1;
-	row = 1;
-	lastPieceID = jigsaw[0][col]->GetID();
-	while (row < jigsawWidth - 1)
-	{
-		if (row < jigsawWidth - 2)
-		{
-			// Get next edge piece, must connect on top edge to last piece and have no connections on right edge
-			vector<Direction> neighbourDirections = { Direction::Top, Direction::Left, Direction::Bottom };
-			vector<int> neighbourIDs = { lastPieceID, -1, -1 };
-			vector<Direction> outerDirections = { Direction::Right };
-
-			PuzzlePiece* newPiece = SearchPieces(piecesBag, neighbourDirections, neighbourIDs, outerDirections, -1);
-			jigsaw[row][col] = newPiece;
-			lastPieceID = newPiece->GetID();
-			RemovePiecesFromBag(piecesBag, lastPieceID); // Remove from bag of pieces
-		}
-		else
-		{
-			// Piece above bottom-left corner piece - must fit
-			vector<Direction> neighbourDirections = { Direction::Top, Direction::Left, Direction::Bottom };
-			vector<int> neighbourIDs = { lastPieceID, -1, jigsaw[jigsawWidth-1][col]->GetID() };
-			vector<Direction> outerDirections = { Direction::Right };
-
-			PuzzlePiece* newPiece = SearchPieces(piecesBag, neighbourDirections, neighbourIDs, outerDirections, -1);
-			jigsaw[row][col] = newPiece;
-			lastPieceID = newPiece->GetID();
-			RemovePiecesFromBag(piecesBag, lastPieceID); // Remove from bag of pieces
-		}
-		row++;
-	}
-
-	cout << endl;
-	for (auto& pieceRow : jigsaw)
-	{
-		for (PuzzlePiece* piece : pieceRow)
-		{
-			if (piece != nullptr)
-				cout << piece->GetID() << "   ";
+			if (row == 0 && col == 0)
+			{
+				// Get top-left corner piece
+				jigsaw[row][col] = GetStartingPiece(cornerPieces[0]->GetID());
+			}
+			else if (row == 0)
+			{
+				// Top row, fill from left of last one
+				jigsaw[row][col] = jigsaw[row][col - 1]->GetConnectedPiece(Direction::Right);
+			}
 			else
 			{
-				cout << "       ";
+				// Not top row, fill in from bottom of piece above
+				jigsaw[row][col] = jigsaw[row-1][col]->GetConnectedPiece(Direction::Bottom);
 			}
-		}
-		cout << endl;
-	}
-	cout << endl;
-
-	// Assemble middle pieces
-	row = 1;
-	col = 1;
-	while (row < jigsawWidth - 1)
-	{
-		while (col < jigsawWidth - 1)
-		{
-			cout << "Filling in piece " << row << ", " << col << endl;
-			// Get next edge piece, must connect on top edge to last piece and have no connections on right edge
-			vector<Direction> neighbourDirections = { Direction::Top, Direction::Left, Direction::Bottom, Direction::Right };
-			vector<int> neighbourIDs = { jigsaw[row-1][col]->GetID(), jigsaw[row][col-1]->GetID(), -1, -1 };
-			vector<Direction> outerDirections = {}; // No outer edges
-
-			PuzzlePiece* newPiece = SearchPieces(piecesBag, neighbourDirections, neighbourIDs, outerDirections, -1);
-			jigsaw[row][col] = newPiece;
-			lastPieceID = newPiece->GetID();
-			RemovePiecesFromBag(piecesBag, lastPieceID); // Remove from bag of pieces
 
 			col++;
 		}
-		col = 1;
 		row++;
+		col = 0;
 	}
 
-	cout << endl;
+	// Print assembled jigsaw
+	cout << endl << "Assembled jigsaw: " << endl;
 	for (auto& pieceRow : jigsaw)
 	{
 		for (PuzzlePiece* piece : pieceRow)
@@ -951,6 +637,7 @@ int main()
 			Image* image = new Image(jigsaw);
 			images.push_back(image);
 
+			// All rotations
 			Image* rotatedImage = new Image(*image);
 			for (int i = 0; i < 3; ++i)
 			{
@@ -959,10 +646,12 @@ int main()
 				rotatedImage = new Image(*rotatedImage);
 			}
 
+			// Flipped
 			Image* flippedImage = new Image(*image);
 			flippedImage->FlipImage();
 			images.push_back(flippedImage);
 
+			// All rotations while flipped
 			rotatedImage = new Image(*flippedImage);
 			for (int i = 0; i < 3; ++i)
 			{
@@ -972,14 +661,11 @@ int main()
 			}
 		}
 
+		// For each image, search for sea monsters
 		for (Image* img : images)
 		{
 			vector<pair<int, int>> offsets;
 			img->MarkSeaMonsters(offsets);
-
-			cout << endl;
-			img->PrintImage();
-			cout << endl;
 
 			if (!offsets.empty())
 			{
@@ -1004,5 +690,4 @@ int main()
 		m_allPieces[i] = nullptr;
 	}
 	m_allPieces.clear();
-	m_pieceConfigMap.clear();
 }
